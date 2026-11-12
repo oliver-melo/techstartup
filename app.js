@@ -27,17 +27,14 @@ let funcionarios = [];
 let proximoId = 1;
 let idEdicao = null;
 
-// --- Funções de manipulação reescritas com Arrow Functions (Expressões Lambda) ---
+// --- Funções de manipulação com Arrow Functions (Expressões Lambda) ---
 
-// Busca um funcionário pelo ID usando expressão lambda (.find)
 const buscarPorId = (id) => funcionarios.find(f => f.getId() === Number(id));
 
-// Busca funcionários pelo Nome usando expressão lambda (.filter)
 const buscarPorNome = (nome) => funcionarios.filter(f =>
     f.getNome().toLowerCase().includes(nome.trim().toLowerCase())
 );
 
-// Direciona a pesquisa conforme a opção selecionada no combobox
 const filtrarFuncionarios = (tipo, termo) => {
     const termoLimpo = termo.trim();
     if (!termoLimpo) return funcionarios;
@@ -48,16 +45,15 @@ const filtrarFuncionarios = (tipo, termo) => {
     } else {
         return buscarPorNome(termoLimpo);
     }
-}
+};
 
-;const limparFormulario = () => {
+const limparFormulario = () => {
     document.getElementById('nome').value = '';
     document.getElementById('idade').value = '';
     document.getElementById('cargo').value = '';
     document.getElementById('salario').value = '';
 };
 
-// Cadastro e Atualização usando arrow function e busca por ID
 const salvarFuncionario = () => {
     const nomeInput = document.getElementById('nome');
     const idadeInput = document.getElementById('idade');
@@ -79,7 +75,6 @@ const salvarFuncionario = () => {
         funcionarios.push(novoFuncionario);
         console.log('Cadastrado:', novoFuncionario.toString());
     } else {
-        // Localiza o funcionário pelo ID com lambda e atualiza via setters
         const funcExistente = buscarPorId(idEdicao);
         if (funcExistente) {
             funcExistente.setNome(nome);
@@ -109,7 +104,6 @@ const carregarParaEdicao = (id) => {
     document.getElementById('btn-salvar').innerText = 'Atualizar';
 };
 
-// Remoção usando arrow function e .filter / .findIndex
 const excluirFuncionario = (id) => {
     funcionarios = funcionarios.filter(f => f.getId() !== id);
 
@@ -120,6 +114,7 @@ const excluirFuncionario = (id) => {
     }
 
     renderizarTabela();
+    atualizarTodosRelatorios();
 };
 
 const renderizarTabela = (lista = funcionarios) => {
@@ -144,27 +139,76 @@ const renderizarTabela = (lista = funcionarios) => {
         const btnEditar = tr.querySelector('.btn-editar');
         const btnExcluir = tr.querySelector('.btn-excluir');
 
-        // Exemplo 1: Evento de clique usando função anônima tradicional
         btnEditar.addEventListener('click', function () {
             carregarParaEdicao(func.getId());
         });
 
-        // Exemplo 2: Substituindo função anônima tradicional por Arrow Function (Lambda)
-        // Antes: btnExcluir.addEventListener('click', function () { excluirFuncionario(func.getId()); });
         btnExcluir.addEventListener('click', () => excluirFuncionario(func.getId()));
 
         tbody.appendChild(tr);
     });
 };
 
+// --- Funções de Relatórios com Streams JS (Exercício 4) ---
+
+// 1. Funcionários com salário maior que R$ 5000 (filter + map)
+const obterRelatorioSalarioMaior5000 = () => {
+    const filtrados = funcionarios
+        .filter(f => f.getSalario() > 5000)
+        .map(f => `${f.getNome()} (${f.getCargo()} - R$ ${f.getSalario().toFixed(2)})`);
+
+    return filtrados.length > 0
+        ? `<strong>Funcionários com Salário > R$ 5000:</strong> ${filtrados.join(', ')}`
+        : '<strong>Funcionários com Salário > R$ 5000:</strong> Nenhum funcionário encontrado.';
+};
+
+// 2. Média salarial dos funcionários (reduce)
+const obterRelatorioMediaSalarial = () => {
+    if (funcionarios.length === 0) return '<strong>Média Salarial:</strong> R$ 0.00';
+    const somaSalarios = funcionarios.reduce((acc, f) => acc + f.getSalario(), 0);
+    const media = (somaSalarios / funcionarios.length).toFixed(2);
+    return `<strong>Média Salarial:</strong> R$ ${media}`;
+};
+
+// 3. Listar apenas os cargos únicos sem repetição (map + new Set)
+const obterRelatorioCargosUnicos = () => {
+    if (funcionarios.length === 0) return '<strong>Cargos Únicos:</strong> Nenhum cargo cadastrado.';
+    const cargosUnicos = [...new Set(funcionarios.map(f => f.getCargo()))];
+    return `<strong>Cargos Únicos:</strong> ${cargosUnicos.join(', ')}`;
+};
+
+// 4. Lista de nomes em maiúsculo (map)
+const obterRelatorioNomesMaiusculo = () => {
+    if (funcionarios.length === 0) return '<strong>Nomes em Maiúsculo:</strong> Nenhum funcionário cadastrado.';
+    const nomesMaiusculos = funcionarios.map(f => f.getNome().toUpperCase());
+    return `<strong>Nomes em Maiúsculo:</strong> ${nomesMaiusculos.join(', ')}`;
+};
+
+const exibirRelatorio = (conteudoHtml) => {
+    document.getElementById('resultado-relatorios').innerHTML = `<p>${conteudoHtml}</p>`;
+};
+
+const atualizarTodosRelatorios = () => {
+    const container = document.getElementById('resultado-relatorios');
+    if (funcionarios.length === 0) {
+        container.innerHTML = '<p>Nenhum funcionário cadastrado para gerar relatórios.</p>';
+        return;
+    }
+
+    container.innerHTML = `
+        <p>${obterRelatorioSalarioMaior5000()}</p>
+        <p>${obterRelatorioMediaSalarial()}</p>
+        <p>${obterRelatorioCargosUnicos()}</p>
+        <p>${obterRelatorioNomesMaiusculo()}</p>
+    `;
+};
+
 // --- Eventos do Formulário e Busca ---
 
-// Função anônima tradicional no evento de clique do botão Cadastrar
 document.getElementById('btn-salvar').addEventListener('click', function () {
     salvarFuncionario();
 });
 
-// Substituição de função anônima por Arrow Function nos eventos de form e busca
 document.getElementById('form-funcionario').addEventListener('submit', (event) => event.preventDefault());
 
 document.getElementById('btn-buscar').addEventListener('click', () => {
@@ -177,4 +221,26 @@ document.getElementById('btn-buscar').addEventListener('click', () => {
 document.getElementById('btn-limpar-busca').addEventListener('click', () => {
     document.getElementById('campo-busca').value = '';
     renderizarTabela(funcionarios);
+});
+
+// --- Eventos dos Botões de Relatórios ---
+
+document.getElementById('btn-rel-salario').addEventListener('click', () => {
+    exibirRelatorio(obterRelatorioSalarioMaior5000());
+});
+
+document.getElementById('btn-rel-media').addEventListener('click', () => {
+    exibirRelatorio(obterRelatorioMediaSalarial());
+});
+
+document.getElementById('btn-rel-cargos').addEventListener('click', () => {
+    exibirRelatorio(obterRelatorioCargosUnicos());
+});
+
+document.getElementById('btn-rel-maiusculo').addEventListener('click', () => {
+    exibirRelatorio(obterRelatorioNomesMaiusculo());
+});
+
+document.getElementById('btn-rel-todos').addEventListener('click', () => {
+    atualizarTodosRelatorios();
 });
