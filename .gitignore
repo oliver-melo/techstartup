@@ -1,0 +1,18 @@
+# Arquivos temporários do Vim
+*.swp
+*.swo
+*~
+.*.sw[a-z]
+
+# Diretórios de editores e IDEs
+.vscode/
+.idea/
+
+# Arquivos de sistema operacional
+.DS_Store
+Thumbs.db
+
+# Logs e variáveis de ambiente locais
+*.log
+.env
+.env.*
