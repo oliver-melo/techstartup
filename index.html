@@ -7,7 +7,7 @@
 <body>
     <h1>Startup Tech - Cadastro de Funcionários</h1>
 
-    <form id="form-funcionario" onsubmit="event.preventDefault();">
+    <form id="form-funcionario">
         <div>
             <label for="nome">Nome:</label>
             <input type="text" id="nome" required>
@@ -34,7 +34,18 @@
     <hr>
 
     <h2>Lista de Funcionários</h2>
-    <table border="1" cellpadding="5" cellspacing="0">
+    <div>
+        <label for="tipo-busca">Buscar por:</label>
+        <select id="tipo-busca">
+            <option value="id">ID</option>
+            <option value="nome">Nome</option>
+        </select>
+        <input type="text" id="campo-busca" placeholder="Digite o valor da busca...">
+        <button type="button" id="btn-buscar">Buscar</button>
+        <button type="button" id="btn-limpar-busca">Mostrar Todos</button>
+    </div>
+
+    <br>    <table border="1" cellpadding="5" cellspacing="0">
         <thead>
             <tr>
                 <th>ID</th>
