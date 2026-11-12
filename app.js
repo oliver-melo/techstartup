@@ -7,43 +7,16 @@ class Funcionario {
         this._salario = Number(salario);
     }
 
-    // Métodos Getters
-    getId() {
-        return this._id;
-    }
+    getId() { return this._id; }
+    getNome() { return this._nome; }
+    getIdade() { return this._idade; }
+    getCargo() { return this._cargo; }
+    getSalario() { return this._salario; }
 
-    getNome() {
-        return this._nome;
-    }
-
-    getIdade() {
-        return this._idade;
-    }
-
-    getCargo() {
-        return this._cargo;
-    }
-
-    getSalario() {
-        return this._salario;
-    }
-
-    // Métodos Setters
-    setNome(novoNome) {
-        this._nome = novoNome;
-    }
-
-    setIdade(novaIdade) {
-        this._idade = Number(novaIdade);
-    }
-
-    setCargo(novoCargo) {
-        this._cargo = novoCargo;
-    }
-
-    setSalario(novoSalario) {
-        this._salario = Number(novoSalario);
-    }
+    setNome(novoNome) { this._nome = novoNome; }
+    setIdade(novaIdade) { this._idade = Number(novaIdade); }
+    setCargo(novoCargo) { this._cargo = novoCargo; }
+    setSalario(novoSalario) { this._salario = Number(novoSalario); }
 
     toString() {
         return `ID: ${this._id} | Nome: ${this._nome} | Idade: ${this._idade} | Cargo: ${this._cargo} | Salário: R$ ${this._salario.toFixed(2)}`;
@@ -52,9 +25,40 @@ class Funcionario {
 
 let funcionarios = [];
 let proximoId = 1;
-let indiceEdicao = null;
+let idEdicao = null;
 
-function salvarFuncionario() {
+// --- Funções de manipulação reescritas com Arrow Functions (Expressões Lambda) ---
+
+// Busca um funcionário pelo ID usando expressão lambda (.find)
+const buscarPorId = (id) => funcionarios.find(f => f.getId() === Number(id));
+
+// Busca funcionários pelo Nome usando expressão lambda (.filter)
+const buscarPorNome = (nome) => funcionarios.filter(f =>
+    f.getNome().toLowerCase().includes(nome.trim().toLowerCase())
+);
+
+// Direciona a pesquisa conforme a opção selecionada no combobox
+const filtrarFuncionarios = (tipo, termo) => {
+    const termoLimpo = termo.trim();
+    if (!termoLimpo) return funcionarios;
+
+    if (tipo === 'id') {
+        const encontrado = buscarPorId(termoLimpo);
+        return encontrado ? [encontrado] : [];
+    } else {
+        return buscarPorNome(termoLimpo);
+    }
+}
+
+;const limparFormulario = () => {
+    document.getElementById('nome').value = '';
+    document.getElementById('idade').value = '';
+    document.getElementById('cargo').value = '';
+    document.getElementById('salario').value = '';
+};
+
+// Cadastro e Atualização usando arrow function e busca por ID
+const salvarFuncionario = () => {
     const nomeInput = document.getElementById('nome');
     const idadeInput = document.getElementById('idade');
     const cargoInput = document.getElementById('cargo');
@@ -70,60 +74,59 @@ function salvarFuncionario() {
         return;
     }
 
-    if (indiceEdicao === null) {
-        // Cadastra novo funcionário
+    if (idEdicao === null) {
         const novoFuncionario = new Funcionario(proximoId++, nome, idade, cargo, salario);
         funcionarios.push(novoFuncionario);
         console.log('Cadastrado:', novoFuncionario.toString());
     } else {
-        // Atualiza os atributos usando os métodos da classe Funcionario
-        const funcExistente = funcionarios[indiceEdicao];
-        funcExistente.setNome(nome);
-        funcExistente.setIdade(idade);
-        funcExistente.setCargo(cargo);
-        funcExistente.setSalario(salario);
-
-        console.log('Atualizado:', funcExistente.toString());
-        indiceEdicao = null;
+        // Localiza o funcionário pelo ID com lambda e atualiza via setters
+        const funcExistente = buscarPorId(idEdicao);
+        if (funcExistente) {
+            funcExistente.setNome(nome);
+            funcExistente.setIdade(idade);
+            funcExistente.setCargo(cargo);
+            funcExistente.setSalario(salario);
+            console.log('Atualizado:', funcExistente.toString());
+        }
+        idEdicao = null;
         document.getElementById('btn-salvar').innerText = 'Cadastrar';
     }
 
     limparFormulario();
     renderizarTabela();
-}
+};
 
-function carregarParaEdicao(index) {
-    const func = funcionarios[index];
+const carregarParaEdicao = (id) => {
+    const func = buscarPorId(id);
+    if (!func) return;
 
     document.getElementById('nome').value = func.getNome();
     document.getElementById('idade').value = func.getIdade();
     document.getElementById('cargo').value = func.getCargo();
     document.getElementById('salario').value = func.getSalario();
 
-    indiceEdicao = index;
+    idEdicao = id;
     document.getElementById('btn-salvar').innerText = 'Atualizar';
-}
+};
 
-function excluirFuncionario(index) {
-    funcionarios.splice(index, 1);
+// Remoção usando arrow function e .filter / .findIndex
+const excluirFuncionario = (id) => {
+    funcionarios = funcionarios.filter(f => f.getId() !== id);
 
-    if (indiceEdicao === index) {
+    if (idEdicao === id) {
         limparFormulario();
-        indiceEdicao = null;
+        idEdicao = null;
         document.getElementById('btn-salvar').innerText = 'Cadastrar';
-    } else if (indiceEdicao !== null && index < indiceEdicao) {
-        indiceEdicao--;
     }
 
     renderizarTabela();
-}
+};
 
-function renderizarTabela() {
+const renderizarTabela = (lista = funcionarios) => {
     const tbody = document.getElementById('tabela-corpo');
     tbody.innerHTML = '';
 
-    for (let i = 0; i < funcionarios.length; i++) {
-        const func = funcionarios[i];
+    lista.forEach(func => {
         const tr = document.createElement('tr');
 
         tr.innerHTML = `
@@ -138,30 +141,40 @@ function renderizarTabela() {
             </td>
         `;
 
-        // Eventos onclick utilizando funções anônimas
         const btnEditar = tr.querySelector('.btn-editar');
         const btnExcluir = tr.querySelector('.btn-excluir');
 
-        btnEditar.onclick = function () {
-            carregarParaEdicao(i);
-        };
+        // Exemplo 1: Evento de clique usando função anônima tradicional
+        btnEditar.addEventListener('click', function () {
+            carregarParaEdicao(func.getId());
+        });
 
-        btnExcluir.onclick = function () {
-            excluirFuncionario(i);
-        };
+        // Exemplo 2: Substituindo função anônima tradicional por Arrow Function (Lambda)
+        // Antes: btnExcluir.addEventListener('click', function () { excluirFuncionario(func.getId()); });
+        btnExcluir.addEventListener('click', () => excluirFuncionario(func.getId()));
 
         tbody.appendChild(tr);
-    }
-}
-
-function limparFormulario() {
-    document.getElementById('nome').value = '';
-    document.getElementById('idade').value = '';
-    document.getElementById('cargo').value = '';
-    document.getElementById('salario').value = '';
-}
-
-// Evento onclick do botão principal com função anônima
-document.getElementById('btn-salvar').onclick = function () {
-    salvarFuncionario();
+    });
 };
+
+// --- Eventos do Formulário e Busca ---
+
+// Função anônima tradicional no evento de clique do botão Cadastrar
+document.getElementById('btn-salvar').addEventListener('click', function () {
+    salvarFuncionario();
+});
+
+// Substituição de função anônima por Arrow Function nos eventos de form e busca
+document.getElementById('form-funcionario').addEventListener('submit', (event) => event.preventDefault());
+
+document.getElementById('btn-buscar').addEventListener('click', () => {
+    const tipo = document.getElementById('tipo-busca').value;
+    const termo = document.getElementById('campo-busca').value;
+    const resultado = filtrarFuncionarios(tipo, termo);
+    renderizarTabela(resultado);
+});
+
+document.getElementById('btn-limpar-busca').addEventListener('click', () => {
+    document.getElementById('campo-busca').value = '';
+    renderizarTabela(funcionarios);
+});
