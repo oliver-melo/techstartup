@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Startup Tech - Gestão de Funcionários</title>
+</head>
+<body>
+    <h1>Startup Tech - Cadastro de Funcionários</h1>
+
+    <form id="form-funcionario" onsubmit="event.preventDefault();">
+        <div>
+            <label for="nome">Nome:</label>
+            <input type="text" id="nome" required>
+        </div>
+        <br>
+        <div>
+            <label for="idade">Idade:</label>
+            <input type="number" id="idade" required>
+        </div>
+        <br>
+        <div>
+            <label for="cargo">Cargo:</label>
+            <input type="text" id="cargo" required>
+        </div>
+        <br>
+        <div>
+            <label for="salario">Salário (R$):</label>
+            <input type="number" id="salario" step="0.01" min="0" required>
+        </div>
+        <br>
+        <button type="button" id="btn-salvar" onclick="cadastrarFuncionario()">Cadastrar</button>
+    </form>
+
+    <hr>
+
+    <h2>Lista de Funcionários</h2>
+    <table border="1" cellpadding="5" cellspacing="0">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Idade</th>
+                <th>Cargo</th>
+                <th>Salário (R$)</th>
+            </tr>
+        </thead>
+        <tbody id="tabela-corpo">
+        </tbody>
+    </table>
+
+    <script src="app.js"></script>
+</body>
+</html>
