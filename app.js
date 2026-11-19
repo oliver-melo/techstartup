@@ -54,6 +54,13 @@ const limparFormulario = () => {
     document.getElementById('salario').value = '';
 };
 
+const resetarBotaoSalvar = () => {
+    const btnSalvar = document.getElementById('btn-salvar');
+    btnSalvar.innerText = 'Cadastrar';
+    btnSalvar.classList.remove('btn-warning');
+    btnSalvar.classList.add('btn-primary');
+};
+
 const salvarFuncionario = () => {
     const nomeInput = document.getElementById('nome');
     const idadeInput = document.getElementById('idade');
@@ -67,6 +74,28 @@ const salvarFuncionario = () => {
 
     if (!nome || !idade || !cargo || !salario) {
         alert('Preencha todos os campos!');
+        return;
+    }
+
+    const regexTextoValido = /^[a-zA-Z\s]+$/;
+
+    if (!regexTextoValido.test(nome)) {
+        alert('Apenas letras sem acento e espaços são permitidos no nome!');
+        return;
+    }
+
+    if (Number(idade) < 14 || Number(idade) > 125) {
+        alert('Idade apenas entre 14 e 125!');
+        return;
+    }
+
+    if (!regexTextoValido.test(cargo)) {
+        alert('Apenas letras sem acento e espaços são permitidos no cargo!');
+        return;
+    }
+
+    if (Number(salario) <= 0) {
+        alert('O salário deve ser maior que zero!');
         return;
     }
 
@@ -84,7 +113,7 @@ const salvarFuncionario = () => {
             console.log('Atualizado:', funcExistente.toString());
         }
         idEdicao = null;
-        document.getElementById('btn-salvar').innerText = 'Cadastrar';
+        resetarBotaoSalvar();
     }
 
     limparFormulario();
@@ -101,7 +130,10 @@ const carregarParaEdicao = (id) => {
     document.getElementById('salario').value = func.getSalario();
 
     idEdicao = id;
-    document.getElementById('btn-salvar').innerText = 'Atualizar';
+    const btnSalvar = document.getElementById('btn-salvar');
+    btnSalvar.innerText = 'Atualizar';
+    btnSalvar.classList.remove('btn-primary');
+    btnSalvar.classList.add('btn-warning');
 };
 
 const excluirFuncionario = (id) => {
@@ -110,11 +142,10 @@ const excluirFuncionario = (id) => {
     if (idEdicao === id) {
         limparFormulario();
         idEdicao = null;
-        document.getElementById('btn-salvar').innerText = 'Cadastrar';
+        resetarBotaoSalvar();
     }
 
     renderizarTabela();
-    atualizarTodosRelatorios();
 };
 
 const renderizarTabela = (lista = funcionarios) => {
@@ -130,9 +161,9 @@ const renderizarTabela = (lista = funcionarios) => {
             <td>${func.getIdade()}</td>
             <td>${func.getCargo()}</td>
             <td>R$ ${func.getSalario().toFixed(2)}</td>
-            <td>
-                <button type="button" class="btn-editar">Editar</button>
-                <button type="button" class="btn-excluir">Excluir</button>
+            <td class="text-center">
+                <button type="button" class="btn btn-warning btn-sm btn-editar me-1">Editar</button>
+                <button type="button" class="btn btn-danger btn-sm btn-excluir">Excluir</button>
             </td>
         `;
 
@@ -185,21 +216,21 @@ const obterRelatorioNomesMaiusculo = () => {
 };
 
 const exibirRelatorio = (conteudoHtml) => {
-    document.getElementById('resultado-relatorios').innerHTML = `<p>${conteudoHtml}</p>`;
+    document.getElementById('resultado-relatorios').innerHTML = `<p class="mb-0">${conteudoHtml}</p>`;
 };
 
 const atualizarTodosRelatorios = () => {
     const container = document.getElementById('resultado-relatorios');
     if (funcionarios.length === 0) {
-        container.innerHTML = '<p>Nenhum funcionário cadastrado para gerar relatórios.</p>';
+        container.innerHTML = '<p class="mb-0 text-muted">Nenhum funcionário cadastrado para gerar relatórios.</p>';
         return;
     }
 
     container.innerHTML = `
-        <p>${obterRelatorioSalarioMaior5000()}</p>
-        <p>${obterRelatorioMediaSalarial()}</p>
-        <p>${obterRelatorioCargosUnicos()}</p>
-        <p>${obterRelatorioNomesMaiusculo()}</p>
+        <p class="mb-1">${obterRelatorioSalarioMaior5000()}</p>
+        <p class="mb-1">${obterRelatorioMediaSalarial()}</p>
+        <p class="mb-1">${obterRelatorioCargosUnicos()}</p>
+        <p class="mb-0">${obterRelatorioNomesMaiusculo()}</p>
     `;
 };
 
